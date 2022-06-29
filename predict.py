@@ -33,14 +33,14 @@ except:
 debug = True
 ####################
 
-df_group = pd.read_csv('data/goods_code_groups.csv', sep=';', header=0, encoding='utf-8', dtype={"id": int, "group_code": int})
-df_group.drop('id', axis=1, inplace=True)
+# df_group = pd.read_csv('data/goods_code_groups.csv', sep=';', header=0, encoding='utf-8', dtype={"id": int, "group_code": int})
+# df_group.drop('id', axis=1, inplace=True)
 
 embedding_dim = 30
 model4 = tf.keras.models.load_model('model4.save')
 model4.summary()
 
-input_text = "Цилиндр тормозной 722 LM80113"  # 349 код группы
+input_text = "696 0221118307 катушка зажигания"  # 654 код группы
 
 tokenize = Tokenizer(num_words=5000)
 tokenize.fit_on_texts(input_text)
@@ -55,10 +55,8 @@ X_train = pad_sequences(X_train, padding='post', maxlen=maxlen)
 with tf.device('/gpu:0'):
     predictions = model4.predict(X_train)
     print('Предсказание: ', predictions)
-    #np.argmax(predictions, axis=-1) # ??????
-    np.all(np.argmax(predictions, -1))
-    group_code = np.where(predictions == np.amax(predictions))[0][1]
-    #print('Код группы: ', df_group[group_code])
+    group_code = np.where(predictions == np.amax(predictions))
+    print('Код группы: ', group_code)
 
 
 
