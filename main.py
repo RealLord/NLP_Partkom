@@ -25,14 +25,14 @@ from tensorflow.python.client import device_lib
 def pir(s):
     return pd.DataFrame({'a':s.value_counts(), 'per':s.value_counts(normalize=True).mul(100).round(1).astype(str) + '%'})
 
-
-physical_devices = tf.config.list_physical_devices('GPU')
-try:
-    tf.config.experimental.set_memory_growth(physical_devices[0], True)
-    tf.function(jit_compile=True)  # Включение XLA
-except:
-    # Invalid device or cannot modify virtual devices once initialized.
-    exit(100)
+#
+# physical_devices = tf.config.list_physical_devices('GPU')
+# try:
+#     tf.config.experimental.set_memory_growth(physical_devices[0], True)
+#     tf.function(jit_compile=True)  # Включение XLA
+# except:
+#     # Invalid device or cannot modify virtual devices once initialized.
+#     exit(100)
 
 ##################
 debug = True
@@ -100,11 +100,15 @@ X_test = pad_sequences(X_test, padding='post', maxlen=maxlen)
 encoder = LabelEncoder()
 encoder.fit(train_y)
 
+# with open("data/group_code_mapping.txt", "w", encoding="utf-8") as o:
+#     for i, key in enumerate(encoder.classes_):
+#         o.write(str(i) + " " + str(key) + "\n")
+
 #################### Пишем список group_code на диск для последующего анализа ##############################
-group_code = train_y.drop_duplicates(keep='first').values.reshape(-1, 1)
-group_code = np.array(group_code)
-group_code = pd.DataFrame(group_code)
-group_code.to_csv("data/goods_code_groups.csv", sep=';', encoding='utf-8')
+# group_code = train_y.drop_duplicates(keep='first').values.reshape(-1, 1)
+# group_code = np.array(group_code)
+# group_code = pd.DataFrame(group_code)
+# group_code.to_csv("data/goods_code_groups.csv", sep=';', encoding='utf-8')
 ###########################################################################################################
 
 y_train = encoder.transform(train_y)
@@ -128,21 +132,21 @@ model4.compile(optimizer='adam',
                 metrics=['accuracy'])
 
 model4.summary()
-with tf.device('/gpu:0'):
-    history_4 = model4.fit(X_train, y_train,
-                        batch_size=32,  # 32 - default
+#with tf.device('/gpu:0'):
+history_4 = model4.fit(X_train, y_train,
+                    batch_size=32,  # 32 - default
                         epochs=1,  # 15 - default
                         validation_data=(X_test, y_test))
 
-model4.save('model4.save')  # Saving model!
+# model4.save('model4.save')  # Saving model!
 if debug:
      print('Go to evaluate')
 
-with tf.device("/cpu:0"):
-    loss, accuracy = model4.evaluate(X_train, y_train, verbose=False)
-    print("Training Accuracy: {:.4f}".format(accuracy))
-    loss, accuracy = model4.evaluate(X_test, y_test, verbose=False)
-    print("Testing Accuracy:  {:.4f}".format(accuracy))
+# with tf.device("/cpu:0"):
+loss, accuracy = model4.evaluate(X_train, y_train, verbose=False)
+print("Training Accuracy: {:.4f}".format(accuracy))
+loss, accuracy = model4.evaluate(X_test, y_test, verbose=False)
+print("Testing Accuracy:  {:.4f}".format(accuracy))
 
 
 
